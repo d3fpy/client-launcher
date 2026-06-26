@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>radikware launcher</title>
+    <style>
+      @font-face {
+        font-family: "SF Pro Display";
+        src: url("sfpro-regular.ttf") format("truetype");
+        font-weight: 400;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "SF Pro Display";
+        src: url("sfpro-bold.ttf") format("truetype");
+        font-weight: 600;
+        font-style: normal;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "SF Pro Display", sans-serif;
+        background: #000000;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        user-select: none;
+      }
+
+      .container {
+        position: relative;
+        width: 850px;
+        height: 520px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .mesh-bg {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        z-index: 1;
+      }
+      .blur-circle {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(140px);
+        opacity: 0.25;
+        animation: float 12s infinite alternate ease-in-out;
+      }
+      .dark-purple {
+        width: 500px;
+        height: 500px;
+        background: #4a002f;
+        top: -120px;
+        left: -80px;
+      }
+      .dark-burgundy {
+        width: 550px;
+        height: 550px;
+        background: #2b031a;
+        bottom: -150px;
+        right: -80px;
+        animation-duration: 16s;
+      }
+      @keyframes float {
+        0% {
+          transform: translate(0, 0) scale(1);
+        }
+        100% {
+          transform: translate(100px, 50px) scale(1.15);
+        }
+      }
+
+      .interface-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 22px;
+        z-index: 2;
+      }
+
+      .input-field {
+        width: 250px;
+        height: 48px;
+        background: #12030c;
+        border: 1px solid #2b071e;
+        border-radius: 16px;
+        padding: 0 15px;
+        color: #ffffff;
+        font-family: "SF Pro Display", sans-serif;
+        font-size: 16px;
+        outline: none;
+        box-sizing: border-box;
+        text-align: center;
+        transition: 0.2s;
+      }
+      .input-field:focus {
+        border-color: #7a004c;
+      }
+
+      .btn-101,
+      .btn-101 *,
+      .btn-101 :after,
+      .btn-101 :before,
+      .btn-101:after,
+      .btn-101:before {
+        border: 0 solid;
+        box-sizing: border-box;
+      }
+      .btn-101 {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-appearance: button;
+        appearance: button;
+        background-image: none;
+        text-transform: uppercase;
+        --thickness: 2px;
+        --roundness: 16px;
+        --opacity: 0.8;
+        -webkit-backdrop-filter: blur(100px);
+        backdrop-filter: blur(100px);
+        border: none;
+        border-radius: var(--roundness);
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 250px;
+        height: 48px;
+        font-family: "SF Pro Display", sans-serif;
+        font-size: 18px;
+        font-weight: bold;
+        position: relative;
+        transition: 0.2s;
+      }
+      .btn-101:disabled {
+        cursor: default;
+        opacity: 0.5;
+      }
+
+      .btn-play {
+        background: #1a0412;
+        --color: #00ff99;
+        color: #7a004c;
+      }
+      .btn-play:hover:not(:disabled) {
+        background: #2d0820;
+        color: #a30066;
+        filter: brightness(1.2);
+      }
+
+      .btn-authors {
+        background: #0e020a;
+        --color: #ff1493;
+        color: #ffffff;
+      }
+      .btn-authors:hover:not(:disabled) {
+        background: #1a0412;
+        filter: brightness(1.2);
+      }
+
+      .btn-101:active {
+        --opacity: 0;
+        background: hsla(0, 0%, 100%, 0.1);
+      }
+      .btn-101 svg {
+        border-radius: var(--roundness);
+        display: block;
+        filter: url(#glow);
+        height: 100%;
+        left: 0;
+        position: absolute;
+        top: 0;
+        width: 100%;
+      }
+      .btn-101 rect {
+        fill: none;
+        stroke: var(--color);
+        stroke-width: var(--thickness);
+        rx: var(--roundness);
+        stroke-linejoin: round;
+        stroke-dasharray: 150%;
+        stroke-dashoffset: 80;
+        animation: snake 2s linear infinite;
+        animation-play-state: paused;
+        height: 100%;
+        opacity: 0;
+        transition: opacity 0.2s;
+        width: 100%;
+      }
+      .btn-101:hover:not(:disabled) rect {
+        animation-play-state: running;
+        opacity: var(--opacity);
+      }
+      @keyframes snake {
+        to {
+          stroke-dashoffset: 300%;
+        }
+      }
+
+      .console-box {
+        width: 380px;
+        height: 85px;
+        background: rgba(14, 2, 10, 0.8);
+        border: 1px solid rgba(122, 0, 76, 0.2);
+        border-radius: 12px;
+        padding: 10px;
+        font-family: "Consolas", "Courier New", monospace;
+        font-size: 11px;
+        color: #ff1493;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        text-align: left;
+        backdrop-filter: blur(8px);
+        margin-top: 5px;
+      }
+      .console-box::-webkit-scrollbar {
+        width: 4px;
+      }
+      .console-box::-webkit-scrollbar-thumb {
+        background: rgba(122, 0, 76, 0.4);
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- SVG glow filter для змейки -->
+    <svg style="display: none">
+      <defs>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+          <feMerge>
+            <feMergeNode in="coloredBlur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+    </svg>
+
+    <div class="container">
+      <div class="mesh-bg">
+        <div class="blur-circle dark-purple"></div>
+        <div class="blur-circle dark-burgundy"></div>
+      </div>
+
+      <div class="interface-box">
+        <img
+          src="./assets/Group 1.png"
+          alt="Logo"
+          style="width: 200px; height: auto; margin-bottom: 10px"
+        />
+
+        <input
+          type="text"
+          id="username"
+          class="input-field"
+          placeholder="Введите никнейм..."
+        />
+
+        <button class="btn-101 btn-play" id="playBtn" onclick="launchGame()">
+          <svg><rect></rect></svg>Play
+        </button>
+
+        <button class="btn-101 btn-authors" onclick="showAuthors()">
+          <svg><rect></rect></svg>Authors
+        </button>
+
+        <div id="console" class="console-box">
+          Система готова. Ожидание ввода никнейма...
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Все Node.js модули доступны напрямую (nodeIntegration: true)
+      const path = require("path");
+      const fs = require("fs");
+      const { ipcRenderer } = require("electron");
+      const CUSTOM_CLIENT_ZIP =
+        "_";
+
+      // ── Консоль ─────────────────────────────────────────────────────────────────
+      function log(text) {
+        const box = document.getElementById("console");
+        box.innerText += "\n" + text;
+        box.scrollTop = box.scrollHeight;
+      }
+
+      // ── Принимаем статусы скачивания/запуска от main-процесса (worker_threads там) ──
+      ipcRenderer.on("launch-status", (event, msg) => {
+        switch (msg.type) {
+          case "status":
+            log(msg.text);
+            break;
+          case "minecraft-log":
+            log(`[MC]: ${msg.text}`);
+            break;
+          case "close":
+            log(`[Radikware]: Игра закрыта (код ${msg.code}).`);
+            resetPlayButton();
+            break;
+        }
+      });
+
+      function resetPlayButton() {
+        const playBtn = document.getElementById("playBtn");
+        playBtn.disabled = false;
+        playBtn.lastChild.textContent = "Play";
+      }
+
+      // ── Запуск игры (вся логика скачивания/распаковки/запуска — в downloader.js) ──
+      function launchGame() {
+        const nick = document.getElementById("username").value.trim();
+        const playBtn = document.getElementById("playBtn");
+
+        if (!nick) {
+          alert("Установите никнейм!");
+          return;
+        }
+
+        playBtn.disabled = true;
+        // Меняем текст кнопки (обходим SVG-дочерний элемент)
+        playBtn.lastChild.textContent = "LAUNCHING...";
+
+        const appData =
+          process.env.APPDATA ||
+          (process.platform === "darwin"
+            ? process.env.HOME + "/Library/Application Support"
+            : process.env.HOME + "/.local/share");
+        const gameRoot = path.join(appData, ".radikware");
+        if (!fs.existsSync(gameRoot))
+          fs.mkdirSync(gameRoot, { recursive: true });
+
+        document.getElementById("console").innerText =
+          "[Radikware]: Сканирование директории...";
+
+        // Вся тяжёлая работа (скачивание/распаковка/запуск) выполняется
+        // в worker_threads внутри main-процесса (см. main.js) — отсюда
+        // только отправляем запрос и слушаем статусы через 'launch-status'.
+        ipcRenderer.send("start-launch", {
+          nick,
+          gameRoot,
+          clientZip: CUSTOM_CLIENT_ZIP,
+        });
+      }
+
+      function showAuthors() {
+        alert("Lead Developer: d3fpy\nDesigners: scvenov, vegoo(Vlad01212)");
+      }
+    </script>
+  </body>
+</html>

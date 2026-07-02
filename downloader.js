@@ -6,9 +6,6 @@ const { execSync } = require('child_process');
 
 const { nick, gameRoot, clientZip } = workerData;
 
-// ─── Имя корневой папки внутри архива сборки на Dropbox ─────────────────────
-// Архив запакован как "radikware/versions/...", "radikware/mods/..." и т.д.
-// После распаковки это нужно "расплющить" в gameRoot напрямую.
 const ARCHIVE_ROOT_FOLDER = 'radikware';
 
 const versionsDir = path.join(gameRoot, 'versions');
@@ -18,11 +15,6 @@ function send(text) {
     parentPort.postMessage({ type: 'status', text });
 }
 
-// ─── Рекурсивно переносит содержимое srcDir в destDir ───────────────────────
-// overwrite = false: слияние без перезаписи (используется при миграции старых
-//             "вложенных" установок — там трогать чужие файлы не нужно)
-// overwrite = true:  файлы сборки ВСЕГДА затирают то, что лежит в gameRoot —
-//             именно так должны накатываться обновления клиента
 function mergeDirInto(srcDir, destDir, overwrite = false) {
     if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
     for (const entry of fs.readdirSync(srcDir, { withFileTypes: true })) {
@@ -31,7 +23,7 @@ function mergeDirInto(srcDir, destDir, overwrite = false) {
         if (entry.isDirectory()) {
             mergeDirInto(srcPath, destPath, overwrite);
         } else if (overwrite) {
-            // Полная замена: убираем то, что лежит на месте (файл или папка), и кладём новое
+           
             if (fs.existsSync(destPath)) {
                 const stat = fs.lstatSync(destPath);
                 if (stat.isDirectory()) {
@@ -42,7 +34,6 @@ function mergeDirInto(srcDir, destDir, overwrite = false) {
             }
             fs.renameSync(srcPath, destPath);
         } else {
-            // Не перезаписываем уже существующие файлы (настройки и т.п.)
             if (!fs.existsSync(destPath)) {
                 fs.renameSync(srcPath, destPath);
             }
@@ -54,7 +45,7 @@ function removeDirRecursive(dir) {
     if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
 }
 
-// ─── Находит реальную папку с версией Minecraft (по jar внутри versions/*) ────
+
 function findVanillaJar(root) {
     const vDir = path.join(root, 'versions');
     if (!fs.existsSync(vDir)) return null;
@@ -77,15 +68,14 @@ function findFabricVersion(root) {
     return null;
 }
 
-// ─── Проверка: установлена ли уже рабочая сборка ────────────────────────────
+
 function isInstalled(root) {
     const hasVersion = !!findVanillaJar(root) || !!findFabricVersion(root);
     const hasMods = fs.existsSync(modsDir) && fs.readdirSync(modsDir).length > 0;
     return hasVersion && hasMods;
 }
 
-// ─── Миграция: если раньше архив был распакован "в себя" (gameRoot/radikware/...)
-// из-за старого бага — расплющиваем эту вложенность один раз при старте ───────
+
 function migrateNestedInstall() {
     const nestedByName = path.join(gameRoot, ARCHIVE_ROOT_FOLDER);
     if (fs.existsSync(nestedByName) && fs.statSync(nestedByName).isDirectory()) {
@@ -95,8 +85,6 @@ function migrateNestedInstall() {
         return;
     }
 
-    // Запасной вариант: versions/ нет в корне, но есть ровно одна папка-кандидат,
-    // внутри которой есть versions/ или mods/.
     if (!fs.existsSync(versionsDir)) {
         const entries = fs.readdirSync(gameRoot, { withFileTypes: true })
             .filter(e => e.isDirectory());
@@ -113,18 +101,18 @@ function migrateNestedInstall() {
     }
 }
 
-// ─── Нормализация только что распакованного архива (та же проблема, но для tmp) ──
+
 function normalizeExtractedTmp(tmpDir) {
     const directRootMarkers = ['versions', 'mods'];
     const hasDirectStructure = directRootMarkers.some(name => fs.existsSync(path.join(tmpDir, name)));
 
     if (hasDirectStructure) {
-        // Архив распаковался без обёртки — переносим как есть
+        
         mergeDirInto(tmpDir, gameRoot);
         return;
     }
 
-    // Ищем обёрточную папку внутри tmp (по фиксированному имени, иначе — единственную)
+    
     const entries = fs.readdirSync(tmpDir, { withFileTypes: true }).filter(e => e.isDirectory());
     let wrapper = entries.find(e => e.name === ARCHIVE_ROOT_FOLDER);
     if (!wrapper && entries.length === 1) {
@@ -134,12 +122,10 @@ function normalizeExtractedTmp(tmpDir) {
     if (wrapper) {
         mergeDirInto(path.join(tmpDir, wrapper.name), gameRoot);
     } else {
-        // Структура неожиданная — переносим всё содержимое tmp как есть
         mergeDirInto(tmpDir, gameRoot);
     }
 }
 
-// ─── Скачать и распаковать сборку с Dropbox ─────────────────────────────────
 async function downloadAndExtract() {
     const zipPath = path.join(gameRoot, 'radikware_temp.zip');
     const tmpExtractDir = path.join(gameRoot, '_radikware_extract_tmp');
@@ -149,14 +135,13 @@ async function downloadAndExtract() {
     const response = await fetch(clientZip, { redirect: 'follow' });
     if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
 
-    // Прогресс по Content-Length
     const total = Number(response.headers.get('content-length')) || 0;
     let received = 0;
     let lastPct = -1;
 
     const fileStream = fs.createWriteStream(zipPath);
 
-    // Читаем поток вручную, чтобы показывать прогресс
+
     const reader = response.body.getReader();
     const chunks = [];
     while (true) {
@@ -181,7 +166,6 @@ async function downloadAndExtract() {
 
     send('[Radikware]: Архив скачан! Распаковка...');
 
-    // Распаковываем во временную папку, чтобы корректно нормализовать структуру
     removeDirRecursive(tmpExtractDir);
     fs.mkdirSync(tmpExtractDir, { recursive: true });
 
@@ -199,11 +183,9 @@ async function downloadAndExtract() {
     send('[Radikware]: Сборка распакована успешно!');
 }
 
-// ─── Запуск Minecraft через minecraft-launcher-core ──────────────────────────
 async function launchMinecraft() {
     const launcher = new Client();
 
-    // Пробрасываем логи Майнкрафта в UI
     launcher.on('data', (e) => {
         parentPort.postMessage({ type: 'minecraft-log', text: String(e).trim() });
     });
@@ -214,7 +196,7 @@ async function launchMinecraft() {
         send(`[Mojang]: Загрузка... ${e.task}/${e.total}`);
     });
 
-    // Определяем версию для запуска: Fabric из сборки, иначе — ванильный jar, который реально есть на диске
+
     const fabricVersionId = findFabricVersion(gameRoot);
     const vanilla = findVanillaJar(gameRoot);
 
@@ -245,15 +227,13 @@ async function launchMinecraft() {
     await launcher.launch(opts);
 }
 
-// ─── Главная логика ──────────────────────────────────────────────────────────
+
 async function start() {
     try {
-        // Создаём gameRoot если нет
         if (!fs.existsSync(gameRoot)) {
             fs.mkdirSync(gameRoot, { recursive: true });
         }
 
-        // Чинит установки, испорченные старым багом (сборка внутри сборки)
         migrateNestedInstall();
 
         if (!isInstalled(gameRoot)) {

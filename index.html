@@ -39,6 +39,33 @@
         align-items: center;
       }
 
+      /* Верхняя панель переключения */
+      .top-nav {
+        position: absolute;
+        top: 25px;
+        right: 25px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        z-index: 10;
+        transition: opacity 0.2s;
+        color: rgba(255, 255, 255, 0.6);
+      }
+      .top-nav:hover {
+        color: #ff1493;
+      }
+      .top-nav svg {
+        width: 16px;
+        height: 16px;
+        fill: currentColor;
+      }
+      .top-nav span {
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+      }
+
       .mesh-bg {
         position: absolute;
         width: 100%;
@@ -82,7 +109,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 22px;
+        gap: 16px;
         z-index: 2;
       }
 
@@ -227,6 +254,89 @@
         background: rgba(122, 0, 76, 0.4);
         border-radius: 4px;
       }
+
+      /* Стильное встроенное Всплывающее Окно Регистрации */
+      .modal-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(10px);
+        z-index: 100;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+      .modal-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .modal-box {
+        background: #0e020a;
+        border: 1px solid #7a004c;
+        border-radius: 24px;
+        padding: 30px;
+        width: 320px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        box-shadow: 0 0 30px rgba(122, 0, 76, 0.3);
+        transform: scale(0.8);
+        transition: transform 0.3s ease;
+      }
+      .modal-overlay.active .modal-box {
+        transform: scale(1);
+      }
+      .modal-title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #ff1493;
+        margin-bottom: 5px;
+        letter-spacing: 0.5px;
+      }
+      /* Стильное кастомное всплывающее уведомление */
+      .toast-popup {
+        position: absolute;
+        top: 30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-20px);
+        background: rgba(26, 4, 18, 0.9);
+        border: 1px solid #7a004c;
+        border-radius: 14px;
+        padding: 12px 24px;
+        color: #ffffff;
+        font-family: "SF Pro Display", sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        box-shadow: 0 0 20px rgba(122, 0, 76, 0.4);
+        z-index: 200;
+        opacity: 0;
+        pointer-events: none;
+        transition:
+          opacity 0.3s ease,
+          transform 0.3s ease;
+      }
+      .toast-popup.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      /* Состояние для заблокированной кнопки регистрации в углу */
+      .top-nav.disabled {
+        pointer-events: none;
+        color: rgba(255, 255, 255, 0.3) !important;
+        cursor: default;
+      }
+      .top-nav.disabled hover {
+        color: rgba(255, 255, 255, 0.3) !important;
+      }
     </style>
   </head>
   <body>
@@ -243,7 +353,49 @@
       </defs>
     </svg>
 
+    <div class="modal-overlay" id="regModal" onclick="closeRegisterModal()">
+      <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-title">РЕГИСТРАЦИЯ</div>
+        <input
+          type="text"
+          id="regUsername"
+          class="input-field"
+          placeholder="Придумайте логин..."
+        />
+        <button class="btn-101 btn-authors" onclick="submitRegistration()">
+          <svg><rect></rect></svg>Создать
+        </button>
+        <button
+          class="btn-101"
+          style="
+            background: transparent;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 14px;
+            height: 30px;
+          "
+          onclick="closeRegisterModal()"
+        >
+          Отмена
+        </button>
+      </div>
+    </div>
+
+    <!-- КРАСИВОЕ ВС ПЛЫВАЮЩЕЕ УВЕДОМЛЕНИЕ (НОВОЕ) -->
+    <div id="toastNotification" class="toast-popup">
+      Аккаунт зарегистрирован
+    </div>
+
     <div class="container">
+      <!-- Кнопка "Регистрация" в правом верхнем углу -->
+      <div class="top-nav" id="authToggleBtn" onclick="openRegisterModal()">
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+          />
+        </svg>
+        <span>Регистрация</span>
+      </div>
+
       <div class="mesh-bg">
         <div class="blur-circle dark-purple"></div>
         <div class="blur-circle dark-burgundy"></div>
@@ -251,7 +403,7 @@
 
       <div class="interface-box">
         <img
-          src="./assets/Group 1.png"
+          src="./assets/logo.png"
           alt="Logo"
           style="width: 200px; height: auto; margin-bottom: 10px"
         />
@@ -260,10 +412,14 @@
           type="text"
           id="username"
           class="input-field"
-          placeholder="Введите никнейм..."
+          placeholder="Логин..."
         />
 
-        <button class="btn-101 btn-play" id="playBtn" onclick="launchGame()">
+        <button
+          class="btn-101 btn-play"
+          id="playBtn"
+          onclick="handleAuthAction()"
+        >
           <svg><rect></rect></svg>Play
         </button>
 
@@ -272,81 +428,248 @@
         </button>
 
         <div id="console" class="console-box">
-          Система готова. Ожидание ввода никнейма...
+          Система готова. Ожидание ввода данных...
         </div>
       </div>
     </div>
-
     <script>
       // Все Node.js модули доступны напрямую (nodeIntegration: true)
       const path = require("path");
       const fs = require("fs");
-      const { ipcRenderer } = require("electron");
-      const CUSTOM_CLIENT_ZIP =
-        "_";
+      const { spawn } = require("child_process");
 
-      // ── Консоль ─────────────────────────────────────────────────────────────────
-      function log(text) {
-        const box = document.getElementById("console");
-        box.innerText += "\n" + text;
-        box.scrollTop = box.scrollHeight;
+      // Папка для скрытых данных игры (.radikware в AppData)
+      const appData =
+        process.env.APPDATA ||
+        (process.platform === "darwin"
+          ? process.env.HOME + "/Library/Application Support"
+          : process.env.HOME + "/.local/share");
+      const gameRoot = path.join(appData, ".radikware");
+      const usersDbPath = path.join(gameRoot, "users.json");
+
+      console.log("APPDATA:", process.env.APPDATA);
+      console.log("gameRoot:", gameRoot);
+      console.log("usersDbPath:", usersDbPath);
+
+      if (!fs.existsSync(gameRoot)) {
+        fs.mkdirSync(gameRoot, { recursive: true });
       }
 
-      // ── Принимаем статусы скачивания/запуска от main-процесса (worker_threads там) ──
-      ipcRenderer.on("launch-status", (event, msg) => {
-        switch (msg.type) {
-          case "status":
-            log(msg.text);
-            break;
-          case "minecraft-log":
-            log(`[MC]: ${msg.text}`);
-            break;
-          case "close":
-            log(`[Radikware]: Игра закрыта (код ${msg.code}).`);
-            resetPlayButton();
-            break;
+      // НАДЕЖНОЕ ВОССТАНОВЛЕНИЕ СЕССИИ ПРИ ПЕРЕЗАХОДЕ В ЛАУНЧЕР
+      window.onload = function () {
+        const lastUser = localStorage.getItem("lastLoggedUser");
+        if (lastUser) {
+          const mainInput = document.getElementById("username");
+          if (mainInput) {
+            mainInput.value = lastUser;
+          }
+          // Принудительно и надежно блокируем кнопку регистрации, меняя текст на никнейм
+          updateTopNavToUser(lastUser);
         }
-      });
+      };
 
-      function resetPlayButton() {
-        const playBtn = document.getElementById("playBtn");
-        playBtn.disabled = false;
-        playBtn.lastChild.textContent = "Play";
+      // Получение всех пользователей из файла
+      function getUsers() {
+        if (!fs.existsSync(usersDbPath)) return {};
+        try {
+          return JSON.parse(fs.readFileSync(usersDbPath, "utf8"));
+        } catch (e) {
+          return {};
+        }
       }
 
-      // ── Запуск игры (вся логика скачивания/распаковки/запуска — в downloader.js) ──
-      function launchGame() {
-        const nick = document.getElementById("username").value.trim();
-        const playBtn = document.getElementById("playBtn");
+      // Сохранение базы пользователей
+      function saveUsers(users) {
+        fs.writeFileSync(usersDbPath, JSON.stringify(users, null, 2), "utf8");
+      }
+
+      // Функция изменения верхней кнопки на логин пользователя
+      function updateTopNavToUser(username) {
+        const topNav = document.getElementById("authToggleBtn");
+        if (topNav) {
+          topNav.classList.add("disabled"); // Применяем класс неактивного состояния
+          topNav.style.pointerEvents = "none"; // Полностью отключаем клики мыши
+          topNav.style.opacity = "0.4"; // Делаем элемент полупрозрачным
+
+          // Находим текстовый span внутри кнопки и меняем "Регистрация" на никнейм
+          const textSpan = topNav.querySelector("span");
+          if (textSpan) {
+            textSpan.textContent = username;
+          }
+        }
+      }
+
+      // Показ кастомного скругленного уведомления в стиле лаунчера
+      function showCustomToast() {
+        const toast = document.getElementById("toastNotification");
+        if (toast) {
+          toast.classList.add("show");
+          setTimeout(() => {
+            toast.classList.remove("show");
+          }, 3000); // Скрывается через 3 секунды
+        }
+      }
+
+      // ── Управление всплывающим окном ──────────────────────────────────────────
+      function openRegisterModal() {
+        // Проверка: если пользователь уже вошел, окно регистрации не откроется
+        const topNav = document.getElementById("authToggleBtn");
+        if (topNav && topNav.classList.contains("disabled")) return;
+
+        const modal = document.getElementById("regModal");
+        const regInput = document.getElementById("regUsername");
+        if (modal) modal.classList.add("active");
+        if (regInput) {
+          regInput.value = "";
+          regInput.focus();
+        }
+      }
+
+      function closeRegisterModal() {
+        const modal = document.getElementById("regModal");
+        if (modal) modal.classList.remove("active");
+      }
+
+      // ── Обработка отправки формы регистрации ──────────────────────────────────
+      function submitRegistration() {
+        const regInput = document.getElementById("regUsername");
+        const mainInput = document.getElementById("username");
+        const nick = regInput ? regInput.value.trim() : "";
 
         if (!nick) {
-          alert("Установите никнейм!");
+          alert("Логин не может быть пустым!");
           return;
         }
 
-        playBtn.disabled = true;
-        // Меняем текст кнопки (обходим SVG-дочерний элемент)
-        playBtn.lastChild.textContent = "LAUNCHING...";
+        const users = getUsers();
 
-        const appData =
-          process.env.APPDATA ||
-          (process.platform === "darwin"
-            ? process.env.HOME + "/Library/Application Support"
-            : process.env.HOME + "/.local/share");
-        const gameRoot = path.join(appData, ".radikware");
-        if (!fs.existsSync(gameRoot))
-          fs.mkdirSync(gameRoot, { recursive: true });
+        if (users[nick.toLowerCase()]) {
+          alert("Пользователь с таким ником уже существует!");
+          return;
+        }
 
-        document.getElementById("console").innerText =
-          "[Radikware]: Сканирование директории...";
+        // Запись профиля в файл users.json
+        users[nick.toLowerCase()] = {
+          username: nick,
+        };
+        saveUsers(users);
 
-        // Вся тяжёлая работа (скачивание/распаковка/запуск) выполняется
-        // в worker_threads внутри main-процесса (см. main.js) — отсюда
-        // только отправляем запрос и слушаем статусы через 'launch-status'.
-        ipcRenderer.send("start-launch", {
-          nick,
+        log(`[Регистрация]: Создан аккаунт ${nick}`);
+
+        // Переносим ник в главное поле ввода
+        if (mainInput) {
+          mainInput.value = nick;
+        }
+
+        // Сохраняем сессию в локальное хранилище лаунчера
+        localStorage.setItem("lastLoggedUser", nick);
+
+        // Переводим верхнюю кнопку в режим отображения текущего пользователя
+        updateTopNavToUser(nick);
+
+        // Закрываем модальное окно и вызываем плавный Toast
+        closeRegisterModal();
+        showCustomToast();
+      }
+
+      // ── Проверка перед запуском ────────────────────────────────────────────────
+      function handleAuthAction() {
+        const nickInput = document.getElementById("username");
+        const nick = nickInput ? nickInput.value.trim() : "";
+
+        if (!nick) {
+          alert("Введите логин для входа!");
+          return;
+        }
+
+        const users = getUsers();
+        const user = users[nick.toLowerCase()];
+
+        // Обновляем и сохраняем имя активной сессии при успешном клике на PLAY
+        localStorage.setItem("lastLoggedUser", user.username);
+        updateTopNavToUser(user.username);
+
+        // Передаем управление процедуре запуска клиента
+        launchGame(user.username);
+      }
+
+      // ── Консоль лаунчера ───────────────────────────────────────────────────────
+      function log(text) {
+        const box = document.getElementById("console");
+        if (box) {
+          box.innerText += "\n" + text;
+          box.scrollTop = box.scrollHeight;
+        }
+      }
+
+      function resetPlayButton() {
+        const playBtn = document.getElementById("playBtn");
+        if (playBtn) {
+          playBtn.disabled = false;
+          playBtn.lastChild.textContent = "Play";
+        }
+      }
+
+      // ── Процесс запуска игры через PowerShell ──────────────────────────────────
+      function launchGame(authorizedName) {
+        const playBtn = document.getElementById("playBtn");
+
+        if (playBtn) {
+          playBtn.disabled = true;
+          playBtn.lastChild.textContent = "LAUNCHING...";
+        }
+
+        let launcherRoot;
+        if (process.env.PORTABLE_EXECUTABLE_DIR) {
+          launcherRoot = process.env.PORTABLE_EXECUTABLE_DIR;
+        } else if (process.env.INIT_CWD) {
+          launcherRoot = process.env.INIT_CWD;
+        } else {
+          launcherRoot = process.cwd();
+        }
+
+        const scriptPath = path.join(launcherRoot, "run-client.ps1");
+
+        if (!fs.existsSync(scriptPath)) {
+          log(
+            `[Radikware Ошибка]: Скрипт не найден рядом с .exe по пути:\n${scriptPath}`,
+          );
+          resetPlayButton();
+          return;
+        }
+
+        log(
+          `[Radikware]: Авторизация успешна. Добро пожаловать, ${authorizedName}!`,
+        );
+
+        const psArgs = [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          scriptPath,
+          "-Username",
+          authorizedName,
+          "-GameDir",
           gameRoot,
-          clientZip: CUSTOM_CLIENT_ZIP,
+        ];
+
+        const child = spawn("powershell.exe", psArgs, {
+          cwd: launcherRoot,
+          env: process.env,
+        });
+
+        child.stdout.on("data", (data) => {
+          log(`[MC]: ${data.toString().trim()}`);
+        });
+
+        child.stderr.on("data", (data) => {
+          log(`[Ошибка PS]: ${data.toString().trim()}`);
+        });
+
+        child.on("close", (code) => {
+          log(`[Radikware]: Процесс завершен (код ${code}).`);
+          resetPlayButton();
         });
       }
 

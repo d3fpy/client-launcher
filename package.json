@@ -18,11 +18,13 @@
   "build": {
     "appId": "com.radikware.launcher",
     "productName": "RadikwareLauncher",
+    "icon": "icon.ico", 
     "files": [
       "**/*"
     ],
     "win": {
-      "target": "portable"
+      "target": "portable",
+      "icon": "icon.ico"
     },
     "directories": {
       "output": "dist"

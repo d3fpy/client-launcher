@@ -1,0 +1,33 @@
+{
+  "name": "radikware-launcher",
+  "version": "1.0.0",
+  "description": "Radikware Private Client Launcher",
+  "author": "d3fpy",
+  "main": "main.js",
+  "scripts": {
+    "start": "npx electron .",
+    "dist": "npx electron-builder --win portable"
+  },
+  "dependencies": {
+    "minecraft-launcher-core": "^3.2.2"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.radikware.launcher",
+    "productName": "RadikwareLauncher",
+    "icon": "icon.ico", 
+    "files": [
+      "**/*"
+    ],
+    "win": {
+      "target": "portable",
+      "icon": "icon.ico"
+    },
+    "directories": {
+      "output": "dist"
+    }
+  }
+}

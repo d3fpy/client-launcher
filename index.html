@@ -1,0 +1,681 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>radikware launcher</title>
+    <style>
+      @font-face {
+        font-family: "SF Pro Display";
+        src: url("sfpro-regular.ttf") format("truetype");
+        font-weight: 400;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "SF Pro Display";
+        src: url("sfpro-bold.ttf") format("truetype");
+        font-weight: 600;
+        font-style: normal;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "SF Pro Display", sans-serif;
+        background: #000000;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        user-select: none;
+      }
+
+      .container {
+        position: relative;
+        width: 850px;
+        height: 520px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      /* Верхняя панель переключения */
+      .top-nav {
+        position: absolute;
+        top: 25px;
+        right: 25px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        z-index: 10;
+        transition: opacity 0.2s;
+        color: rgba(255, 255, 255, 0.6);
+      }
+      .top-nav:hover {
+        color: #ff1493;
+      }
+      .top-nav svg {
+        width: 16px;
+        height: 16px;
+        fill: currentColor;
+      }
+      .top-nav span {
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+      }
+
+      .mesh-bg {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        z-index: 1;
+      }
+      .blur-circle {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(140px);
+        opacity: 0.25;
+        animation: float 12s infinite alternate ease-in-out;
+      }
+      .dark-purple {
+        width: 500px;
+        height: 500px;
+        background: #4a002f;
+        top: -120px;
+        left: -80px;
+      }
+      .dark-burgundy {
+        width: 550px;
+        height: 550px;
+        background: #2b031a;
+        bottom: -150px;
+        right: -80px;
+        animation-duration: 16s;
+      }
+      @keyframes float {
+        0% {
+          transform: translate(0, 0) scale(1);
+        }
+        100% {
+          transform: translate(100px, 50px) scale(1.15);
+        }
+      }
+
+      .interface-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        z-index: 2;
+      }
+
+      .input-field {
+        width: 250px;
+        height: 48px;
+        background: #12030c;
+        border: 1px solid #2b071e;
+        border-radius: 16px;
+        padding: 0 15px;
+        color: #ffffff;
+        font-family: "SF Pro Display", sans-serif;
+        font-size: 16px;
+        outline: none;
+        box-sizing: border-box;
+        text-align: center;
+        transition: 0.2s;
+      }
+      .input-field:focus {
+        border-color: #7a004c;
+      }
+
+      .btn-101,
+      .btn-101 *,
+      .btn-101 :after,
+      .btn-101 :before,
+      .btn-101:after,
+      .btn-101:before {
+        border: 0 solid;
+        box-sizing: border-box;
+      }
+      .btn-101 {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-appearance: button;
+        appearance: button;
+        background-image: none;
+        text-transform: uppercase;
+        --thickness: 2px;
+        --roundness: 16px;
+        --opacity: 0.8;
+        -webkit-backdrop-filter: blur(100px);
+        backdrop-filter: blur(100px);
+        border: none;
+        border-radius: var(--roundness);
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 250px;
+        height: 48px;
+        font-family: "SF Pro Display", sans-serif;
+        font-size: 18px;
+        font-weight: bold;
+        position: relative;
+        transition: 0.2s;
+      }
+      .btn-101:disabled {
+        cursor: default;
+        opacity: 0.5;
+      }
+
+      .btn-play {
+        background: #1a0412;
+        --color: #00ff99;
+        color: #7a004c;
+      }
+      .btn-play:hover:not(:disabled) {
+        background: #2d0820;
+        color: #a30066;
+        filter: brightness(1.2);
+      }
+
+      .btn-authors {
+        background: #0e020a;
+        --color: #ff1493;
+        color: #ffffff;
+      }
+      .btn-authors:hover:not(:disabled) {
+        background: #1a0412;
+        filter: brightness(1.2);
+      }
+
+      .btn-101:active {
+        --opacity: 0;
+        background: hsla(0, 0%, 100%, 0.1);
+      }
+      .btn-101 svg {
+        border-radius: var(--roundness);
+        display: block;
+        filter: url(#glow);
+        height: 100%;
+        left: 0;
+        position: absolute;
+        top: 0;
+        width: 100%;
+      }
+      .btn-101 rect {
+        fill: none;
+        stroke: var(--color);
+        stroke-width: var(--thickness);
+        rx: var(--roundness);
+        stroke-linejoin: round;
+        stroke-dasharray: 150%;
+        stroke-dashoffset: 80;
+        animation: snake 2s linear infinite;
+        animation-play-state: paused;
+        height: 100%;
+        opacity: 0;
+        transition: opacity 0.2s;
+        width: 100%;
+      }
+      .btn-101:hover:not(:disabled) rect {
+        animation-play-state: running;
+        opacity: var(--opacity);
+      }
+      @keyframes snake {
+        to {
+          stroke-dashoffset: 300%;
+        }
+      }
+
+      .console-box {
+        width: 380px;
+        height: 85px;
+        background: rgba(14, 2, 10, 0.8);
+        border: 1px solid rgba(122, 0, 76, 0.2);
+        border-radius: 12px;
+        padding: 10px;
+        font-family: "Consolas", "Courier New", monospace;
+        font-size: 11px;
+        color: #ff1493;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        text-align: left;
+        backdrop-filter: blur(8px);
+        margin-top: 5px;
+      }
+      .console-box::-webkit-scrollbar {
+        width: 4px;
+      }
+      .console-box::-webkit-scrollbar-thumb {
+        background: rgba(122, 0, 76, 0.4);
+        border-radius: 4px;
+      }
+
+      /* Стильное встроенное Всплывающее Окно Регистрации */
+      .modal-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(10px);
+        z-index: 100;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+      .modal-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .modal-box {
+        background: #0e020a;
+        border: 1px solid #7a004c;
+        border-radius: 24px;
+        padding: 30px;
+        width: 320px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        box-shadow: 0 0 30px rgba(122, 0, 76, 0.3);
+        transform: scale(0.8);
+        transition: transform 0.3s ease;
+      }
+      .modal-overlay.active .modal-box {
+        transform: scale(1);
+      }
+      .modal-title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #ff1493;
+        margin-bottom: 5px;
+        letter-spacing: 0.5px;
+      }
+      /* Стильное кастомное всплывающее уведомление */
+      .toast-popup {
+        position: absolute;
+        top: 30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-20px);
+        background: rgba(26, 4, 18, 0.9);
+        border: 1px solid #7a004c;
+        border-radius: 14px;
+        padding: 12px 24px;
+        color: #ffffff;
+        font-family: "SF Pro Display", sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        box-shadow: 0 0 20px rgba(122, 0, 76, 0.4);
+        z-index: 200;
+        opacity: 0;
+        pointer-events: none;
+        transition:
+          opacity 0.3s ease,
+          transform 0.3s ease;
+      }
+      .toast-popup.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      /* Состояние для заблокированной кнопки регистрации в углу */
+      .top-nav.disabled {
+        pointer-events: none;
+        color: rgba(255, 255, 255, 0.3) !important;
+        cursor: default;
+      }
+      .top-nav.disabled hover {
+        color: rgba(255, 255, 255, 0.3) !important;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- SVG glow filter для змейки -->
+    <svg style="display: none">
+      <defs>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+          <feMerge>
+            <feMergeNode in="coloredBlur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+    </svg>
+
+    <div class="modal-overlay" id="regModal" onclick="closeRegisterModal()">
+      <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-title">РЕГИСТРАЦИЯ</div>
+        <input
+          type="text"
+          id="regUsername"
+          class="input-field"
+          placeholder="Придумайте логин..."
+        />
+        <button class="btn-101 btn-authors" onclick="submitRegistration()">
+          <svg><rect></rect></svg>Создать
+        </button>
+        <button
+          class="btn-101"
+          style="
+            background: transparent;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 14px;
+            height: 30px;
+          "
+          onclick="closeRegisterModal()"
+        >
+          Отмена
+        </button>
+      </div>
+    </div>
+
+    <!-- КРАСИВОЕ ВС ПЛЫВАЮЩЕЕ УВЕДОМЛЕНИЕ (НОВОЕ) -->
+    <div id="toastNotification" class="toast-popup">
+      Аккаунт зарегистрирован
+    </div>
+
+    <div class="container">
+      <!-- Кнопка "Регистрация" в правом верхнем углу -->
+      <div class="top-nav" id="authToggleBtn" onclick="openRegisterModal()">
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+          />
+        </svg>
+        <span>Регистрация</span>
+      </div>
+
+      <div class="mesh-bg">
+        <div class="blur-circle dark-purple"></div>
+        <div class="blur-circle dark-burgundy"></div>
+      </div>
+
+      <div class="interface-box">
+        <img
+          src="./assets/logo.png"
+          alt="Logo"
+          style="width: 200px; height: auto; margin-bottom: 10px"
+        />
+
+        <input
+          type="text"
+          id="username"
+          class="input-field"
+          placeholder="Логин..."
+        />
+
+        <button
+          class="btn-101 btn-play"
+          id="playBtn"
+          onclick="handleAuthAction()"
+        >
+          <svg><rect></rect></svg>Play
+        </button>
+
+        <button class="btn-101 btn-authors" onclick="showAuthors()">
+          <svg><rect></rect></svg>Authors
+        </button>
+
+        <div id="console" class="console-box">
+          Система готова. Ожидание ввода данных...
+        </div>
+      </div>
+    </div>
+    <script>
+      // Все Node.js модули доступны напрямую (nodeIntegration: true)
+      const path = require("path");
+      const fs = require("fs");
+      const { spawn } = require("child_process");
+
+      // Папка для скрытых данных игры (.radikware в AppData)
+      const appData =
+        process.env.APPDATA ||
+        (process.platform === "darwin"
+          ? process.env.HOME + "/Library/Application Support"
+          : process.env.HOME + "/.local/share");
+      const gameRoot = path.join(appData, ".radikware");
+      const usersDbPath = path.join(gameRoot, "users.json");
+
+      console.log("APPDATA:", process.env.APPDATA);
+      console.log("gameRoot:", gameRoot);
+      console.log("usersDbPath:", usersDbPath);
+
+      if (!fs.existsSync(gameRoot)) {
+        fs.mkdirSync(gameRoot, { recursive: true });
+      }
+
+      // НАДЕЖНОЕ ВОССТАНОВЛЕНИЕ СЕССИИ ПРИ ПЕРЕЗАХОДЕ В ЛАУНЧЕР
+      window.onload = function () {
+        const lastUser = localStorage.getItem("lastLoggedUser");
+        if (lastUser) {
+          const mainInput = document.getElementById("username");
+          if (mainInput) {
+            mainInput.value = lastUser;
+          }
+          // Принудительно и надежно блокируем кнопку регистрации, меняя текст на никнейм
+          updateTopNavToUser(lastUser);
+        }
+      };
+
+      // Получение всех пользователей из файла
+      function getUsers() {
+        if (!fs.existsSync(usersDbPath)) return {};
+        try {
+          return JSON.parse(fs.readFileSync(usersDbPath, "utf8"));
+        } catch (e) {
+          return {};
+        }
+      }
+
+      // Сохранение базы пользователей
+      function saveUsers(users) {
+        fs.writeFileSync(usersDbPath, JSON.stringify(users, null, 2), "utf8");
+      }
+
+      // Функция изменения верхней кнопки на логин пользователя
+      function updateTopNavToUser(username) {
+        const topNav = document.getElementById("authToggleBtn");
+        if (topNav) {
+          topNav.classList.add("disabled"); // Применяем класс неактивного состояния
+          topNav.style.pointerEvents = "none"; // Полностью отключаем клики мыши
+          topNav.style.opacity = "0.4"; // Делаем элемент полупрозрачным
+
+          // Находим текстовый span внутри кнопки и меняем "Регистрация" на никнейм
+          const textSpan = topNav.querySelector("span");
+          if (textSpan) {
+            textSpan.textContent = username;
+          }
+        }
+      }
+
+      // Показ кастомного скругленного уведомления в стиле лаунчера
+      function showCustomToast() {
+        const toast = document.getElementById("toastNotification");
+        if (toast) {
+          toast.classList.add("show");
+          setTimeout(() => {
+            toast.classList.remove("show");
+          }, 3000); // Скрывается через 3 секунды
+        }
+      }
+
+      // ── Управление всплывающим окном ──────────────────────────────────────────
+      function openRegisterModal() {
+        // Проверка: если пользователь уже вошел, окно регистрации не откроется
+        const topNav = document.getElementById("authToggleBtn");
+        if (topNav && topNav.classList.contains("disabled")) return;
+
+        const modal = document.getElementById("regModal");
+        const regInput = document.getElementById("regUsername");
+        if (modal) modal.classList.add("active");
+        if (regInput) {
+          regInput.value = "";
+          regInput.focus();
+        }
+      }
+
+      function closeRegisterModal() {
+        const modal = document.getElementById("regModal");
+        if (modal) modal.classList.remove("active");
+      }
+
+      // ── Обработка отправки формы регистрации ──────────────────────────────────
+      function submitRegistration() {
+        const regInput = document.getElementById("regUsername");
+        const mainInput = document.getElementById("username");
+        const nick = regInput ? regInput.value.trim() : "";
+
+        if (!nick) {
+          alert("Логин не может быть пустым!");
+          return;
+        }
+
+        const users = getUsers();
+
+        if (users[nick.toLowerCase()]) {
+          alert("Пользователь с таким ником уже существует!");
+          return;
+        }
+
+        // Запись профиля в файл users.json
+        users[nick.toLowerCase()] = {
+          username: nick,
+        };
+        saveUsers(users);
+
+        log(`[Регистрация]: Создан аккаунт ${nick}`);
+
+        // Переносим ник в главное поле ввода
+        if (mainInput) {
+          mainInput.value = nick;
+        }
+
+        // Сохраняем сессию в локальное хранилище лаунчера
+        localStorage.setItem("lastLoggedUser", nick);
+
+        // Переводим верхнюю кнопку в режим отображения текущего пользователя
+        updateTopNavToUser(nick);
+
+        // Закрываем модальное окно и вызываем плавный Toast
+        closeRegisterModal();
+        showCustomToast();
+      }
+
+      // ── Проверка перед запуском ────────────────────────────────────────────────
+      function handleAuthAction() {
+        const nickInput = document.getElementById("username");
+        const nick = nickInput ? nickInput.value.trim() : "";
+
+        if (!nick) {
+          alert("Введите логин для входа!");
+          return;
+        }
+
+        const users = getUsers();
+        const user = users[nick.toLowerCase()];
+
+        // Обновляем и сохраняем имя активной сессии при успешном клике на PLAY
+        localStorage.setItem("lastLoggedUser", user.username);
+        updateTopNavToUser(user.username);
+
+        // Передаем управление процедуре запуска клиента
+        launchGame(user.username);
+      }
+
+      // ── Консоль лаунчера ───────────────────────────────────────────────────────
+      function log(text) {
+        const box = document.getElementById("console");
+        if (box) {
+          box.innerText += "\n" + text;
+          box.scrollTop = box.scrollHeight;
+        }
+      }
+
+      function resetPlayButton() {
+        const playBtn = document.getElementById("playBtn");
+        if (playBtn) {
+          playBtn.disabled = false;
+          playBtn.lastChild.textContent = "Play";
+        }
+      }
+
+      // ── Процесс запуска игры через PowerShell ──────────────────────────────────
+      function launchGame(authorizedName) {
+        const playBtn = document.getElementById("playBtn");
+
+        if (playBtn) {
+          playBtn.disabled = true;
+          playBtn.lastChild.textContent = "LAUNCHING...";
+        }
+
+        let launcherRoot;
+        if (process.env.PORTABLE_EXECUTABLE_DIR) {
+          launcherRoot = process.env.PORTABLE_EXECUTABLE_DIR;
+        } else if (process.env.INIT_CWD) {
+          launcherRoot = process.env.INIT_CWD;
+        } else {
+          launcherRoot = process.cwd();
+        }
+
+        const scriptPath = path.join(launcherRoot, "run-client.ps1");
+
+        if (!fs.existsSync(scriptPath)) {
+          log(
+            `[Radikware Ошибка]: Скрипт не найден рядом с .exe по пути:\n${scriptPath}`,
+          );
+          resetPlayButton();
+          return;
+        }
+
+        log(
+          `[Radikware]: Авторизация успешна. Добро пожаловать, ${authorizedName}!`,
+        );
+
+        const psArgs = [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          scriptPath,
+          "-Username",
+          authorizedName,
+          "-GameDir",
+          gameRoot,
+        ];
+
+        const child = spawn("powershell.exe", psArgs, {
+          cwd: launcherRoot,
+          env: process.env,
+        });
+
+        child.stdout.on("data", (data) => {
+          log(`[MC]: ${data.toString().trim()}`);
+        });
+
+        child.stderr.on("data", (data) => {
+          log(`[Ошибка PS]: ${data.toString().trim()}`);
+        });
+
+        child.on("close", (code) => {
+          log(`[Radikware]: Процесс завершен (код ${code}).`);
+          resetPlayButton();
+        });
+      }
+
+      function showAuthors() {
+        alert("Lead Developer: d3fpy\nDesigners: scvenov, vegoo(Vlad01212)");
+      }
+    </script>
+  </body>
+</html>

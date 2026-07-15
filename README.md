@@ -2,6 +2,7 @@
 
 <img src="assets/logo.png" />
 
+---
   
 ![Electron](https://img.shields.io/badge/Electron-31.0.0-47848F?logo=electron&logoColor=white)
 ![Platform](https://img.shields.io/badge/platform-Windows-blue)

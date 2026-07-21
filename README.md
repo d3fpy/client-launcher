@@ -15,17 +15,6 @@
 
 Лаунчер, разработанный для собственного чит-клиента Minecraft. Построен на Electron и отвечает за авторизацию, загрузку файлов клиента и его запуск поверх `minecraft-launcher-core`.
 
-### ✨ Возможности
-
-| Функция | Описание |
-|---|---|
-| 🖥 Интерфейс | Кастомный UI на Electron (`index.html`, `main.js`) |
-| 📥 Загрузка | Автоматическая загрузка файлов клиента (`downloader.js`) |
-| 🚀 Запуск | Запуск Minecraft через `minecraft-launcher-core` |
-| 📦 Сборка | Портативный `.exe` под Windows (`electron-builder`) |
-
-### 🛠 Стек технологий
-
 - **Electron** `^31.0.0`
 - **minecraft-launcher-core** `^3.2.2`
 - **electron-builder** `^26.15.3`
@@ -60,9 +49,6 @@ client-launcher/
 └── package.json
 ```
 
-### 👤 Автор
-
-Разработано **d3fpy**.
 
 <div align="right">
 
@@ -75,17 +61,6 @@ client-launcher/
 ## 🇬🇧 English
 
 A launcher built for a custom Minecraft cheat client. Built with Electron, it handles authentication, downloading client files, and launching the game on top of `minecraft-launcher-core`.
-
-### ✨ Features
-
-| Feature | Description |
-|---|---|
-| 🖥 UI | Custom Electron-based interface (`index.html`, `main.js`) |
-| 📥 Downloads | Automatically downloads client files (`downloader.js`) |
-| 🚀 Launch | Launches Minecraft via `minecraft-launcher-core` |
-| 📦 Build | Portable Windows `.exe` (`electron-builder`) |
-
-### 🛠 Tech Stack
 
 - **Electron** `^31.0.0`
 - **minecraft-launcher-core** `^3.2.2`
@@ -120,10 +95,6 @@ client-launcher/
 ├── sfpro.otf      # UI font
 └── package.json
 ```
-
-### 👤 Author
-
-Developed by **d3fpy**.
 
 <div align="right">
 

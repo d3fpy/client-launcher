@@ -39,7 +39,6 @@
         align-items: center;
       }
 
-      /* Верхняя панель переключения */
       .top-nav {
         position: absolute;
         top: 25px;
@@ -255,7 +254,6 @@
         border-radius: 4px;
       }
 
-      /* Стильное встроенное Всплывающее Окно Регистрации */
       .modal-overlay {
         position: absolute;
         top: 0;
@@ -300,7 +298,7 @@
         margin-bottom: 5px;
         letter-spacing: 0.5px;
       }
-      /* Стильное кастомное всплывающее уведомление */
+
       .toast-popup {
         position: absolute;
         top: 30px;
@@ -328,7 +326,6 @@
         transform: translateX(-50%) translateY(0);
       }
 
-      /* Состояние для заблокированной кнопки регистрации в углу */
       .top-nav.disabled {
         pointer-events: none;
         color: rgba(255, 255, 255, 0.3) !important;
@@ -340,7 +337,6 @@
     </style>
   </head>
   <body>
-    <!-- SVG glow filter для змейки -->
     <svg style="display: none">
       <defs>
         <filter id="glow">
@@ -380,13 +376,11 @@
       </div>
     </div>
 
-    <!-- КРАСИВОЕ ВС ПЛЫВАЮЩЕЕ УВЕДОМЛЕНИЕ (НОВОЕ) -->
     <div id="toastNotification" class="toast-popup">
       Аккаунт зарегистрирован
     </div>
 
     <div class="container">
-      <!-- Кнопка "Регистрация" в правом верхнем углу -->
       <div class="top-nav" id="authToggleBtn" onclick="openRegisterModal()">
         <svg viewBox="0 0 24 24">
           <path
@@ -433,12 +427,9 @@
       </div>
     </div>
     <script>
-      // Все Node.js модули доступны напрямую (nodeIntegration: true)
       const path = require("path");
       const fs = require("fs");
       const { spawn } = require("child_process");
-
-      // Папка для скрытых данных игры (.radikware в AppData)
       const appData =
         process.env.APPDATA ||
         (process.platform === "darwin"
@@ -455,7 +446,6 @@
         fs.mkdirSync(gameRoot, { recursive: true });
       }
 
-      // НАДЕЖНОЕ ВОССТАНОВЛЕНИЕ СЕССИИ ПРИ ПЕРЕЗАХОДЕ В ЛАУНЧЕР
       window.onload = function () {
         const lastUser = localStorage.getItem("lastLoggedUser");
         if (lastUser) {
@@ -463,12 +453,10 @@
           if (mainInput) {
             mainInput.value = lastUser;
           }
-          // Принудительно и надежно блокируем кнопку регистрации, меняя текст на никнейм
           updateTopNavToUser(lastUser);
         }
       };
 
-      // Получение всех пользователей из файла
       function getUsers() {
         if (!fs.existsSync(usersDbPath)) return {};
         try {
@@ -478,20 +466,17 @@
         }
       }
 
-      // Сохранение базы пользователей
       function saveUsers(users) {
         fs.writeFileSync(usersDbPath, JSON.stringify(users, null, 2), "utf8");
       }
 
-      // Функция изменения верхней кнопки на логин пользователя
       function updateTopNavToUser(username) {
         const topNav = document.getElementById("authToggleBtn");
         if (topNav) {
-          topNav.classList.add("disabled"); // Применяем класс неактивного состояния
-          topNav.style.pointerEvents = "none"; // Полностью отключаем клики мыши
-          topNav.style.opacity = "0.4"; // Делаем элемент полупрозрачным
+          topNav.classList.add("disabled"); 
+          topNav.style.pointerEvents = "none"; 
+          topNav.style.opacity = "0.4"; 
 
-          // Находим текстовый span внутри кнопки и меняем "Регистрация" на никнейм
           const textSpan = topNav.querySelector("span");
           if (textSpan) {
             textSpan.textContent = username;
@@ -499,7 +484,6 @@
         }
       }
 
-      // Показ кастомного скругленного уведомления в стиле лаунчера
       function showCustomToast() {
         const toast = document.getElementById("toastNotification");
         if (toast) {
@@ -509,10 +493,8 @@
           }, 3000); // Скрывается через 3 секунды
         }
       }
-
-      // ── Управление всплывающим окном ──────────────────────────────────────────
+      
       function openRegisterModal() {
-        // Проверка: если пользователь уже вошел, окно регистрации не откроется
         const topNav = document.getElementById("authToggleBtn");
         if (topNav && topNav.classList.contains("disabled")) return;
 
@@ -530,7 +512,6 @@
         if (modal) modal.classList.remove("active");
       }
 
-      // ── Обработка отправки формы регистрации ──────────────────────────────────
       function submitRegistration() {
         const regInput = document.getElementById("regUsername");
         const mainInput = document.getElementById("username");
@@ -548,7 +529,7 @@
           return;
         }
 
-        // Запись профиля в файл users.json
+
         users[nick.toLowerCase()] = {
           username: nick,
         };
@@ -556,23 +537,18 @@
 
         log(`[Регистрация]: Создан аккаунт ${nick}`);
 
-        // Переносим ник в главное поле ввода
         if (mainInput) {
           mainInput.value = nick;
         }
 
-        // Сохраняем сессию в локальное хранилище лаунчера
         localStorage.setItem("lastLoggedUser", nick);
 
-        // Переводим верхнюю кнопку в режим отображения текущего пользователя
         updateTopNavToUser(nick);
 
-        // Закрываем модальное окно и вызываем плавный Toast
         closeRegisterModal();
         showCustomToast();
       }
 
-      // ── Проверка перед запуском ────────────────────────────────────────────────
       function handleAuthAction() {
         const nickInput = document.getElementById("username");
         const nick = nickInput ? nickInput.value.trim() : "";
@@ -585,15 +561,13 @@
         const users = getUsers();
         const user = users[nick.toLowerCase()];
 
-        // Обновляем и сохраняем имя активной сессии при успешном клике на PLAY
         localStorage.setItem("lastLoggedUser", user.username);
         updateTopNavToUser(user.username);
 
-        // Передаем управление процедуре запуска клиента
+
         launchGame(user.username);
       }
 
-      // ── Консоль лаунчера ───────────────────────────────────────────────────────
       function log(text) {
         const box = document.getElementById("console");
         if (box) {
@@ -610,7 +584,6 @@
         }
       }
 
-      // ── Процесс запуска игры через PowerShell ──────────────────────────────────
       function launchGame(authorizedName) {
         const playBtn = document.getElementById("playBtn");
 

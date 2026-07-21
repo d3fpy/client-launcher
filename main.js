@@ -10,7 +10,7 @@ function createWindow() {
         height: 520,
         frame: false,
         resizable: false,
-        icon: path.join(__dirname, 'logo.png'), // Указываем иконку для панели задач (замените logo.png на ваше имя файла, если оно другое)
+        icon: path.join(__dirname, 'logo.png'), 
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false
@@ -19,11 +19,9 @@ function createWindow() {
 
     win.loadFile('index.html');
     win.webContents.openDevTools();
-
-    // ── IPC: запуск скачивания/распаковки/игры в worker_threads из main-процесса ──
-    // (worker_threads не работают из renderer-процесса Electron — только из main)
+    
     ipcMain.on('start-launch', (event, payload) => {
-        // Если уже что-то запущено — игнорируем повторный клик
+        
         if (activeWorker) return;
 
         activeWorker = new Worker(path.join(__dirname, 'downloader.js'), {
